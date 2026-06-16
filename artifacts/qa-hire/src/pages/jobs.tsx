@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Jobs() {
   const [status, setStatus] = useState<ListJobsStatus | "all">("new");
-  const [minScore, setMinScore] = useState<string>("70");
+  const [minScore, setMinScore] = useState<string>("0");
   const [location, setLocation] = useState<string>("");
   
   // Use debounced values for API calls if needed, but for simplicity we'll let wouter/query handle it
