@@ -1,0 +1,105 @@
+Act as a senior product architect and full-stack AI SaaS builder.
+
+I want to build an AI Job Finder / Job Curator platform.
+
+The first MVP should focus only on QA / Testing jobs.
+
+Core idea:
+A user enters their profile details:
+- Skill set: Manual QA, Automation QA, Full Stack QA, Playwright, Selenium, API Testing, Performance Testing, Mobile Testing, AI-assisted QA, etc.
+- Years of experience
+- Preferred locations: Pune, Mumbai, Bangalore, Hyderabad, Remote, etc.
+- Notice period
+- Expected salary
+- Preferred job type: full-time, remote, hybrid, contract
+- Keywords to include
+- Keywords to exclude
+
+The system should automatically find matching QA jobs from multiple sources such as:
+- LinkedIn
+- Naukri
+- Indeed
+- Hirist
+- Wellfound
+- Company career pages
+- Other public job boards
+
+Important:
+Start with legally safe/public job discovery methods. Avoid violating website terms. Where scraping is risky, suggest alternatives like APIs, RSS, Google Custom Search, job board integrations, browser automation for personal use, or curated source indexing.
+
+Main functionality:
+1. User creates a job preference profile.
+2. System runs every morning.
+3. It searches job sources for matching QA jobs.
+4. It extracts useful job details:
+   - Job title
+   - Company name
+   - Location
+   - Experience required
+   - Skills mentioned
+   - Salary if available
+   - Job source
+   - Apply link
+   - Posted date
+   - Match score
+   - Reason why this job matched the user profile
+5. It removes duplicate job posts.
+6. It ranks jobs based on relevance.
+7. It sends the best matching jobs to the user through:
+   - Telegram first
+   - Later WhatsApp/email can be added
+8. User should be able to mark jobs as:
+   - Interested
+   - Not relevant
+   - Applied
+   - Duplicate
+9. The system should learn from this feedback and improve future matches.
+
+MVP scope:
+Build only for QA jobs first.
+
+MVP user flow:
+- User signs up
+- User creates QA job preference profile
+- User connects Telegram
+- Admin/system runs daily job search
+- User receives daily curated QA jobs
+- User can open dashboard to view saved jobs and applied jobs
+
+Technology preference:
+Suggest a practical tech stack that can be built quickly.
+Preferred options:
+- Frontend: React / Next.js
+- Backend: Node.js or Python FastAPI
+- Database: PostgreSQL / Supabase
+- Job scheduler: cron / GitHub Actions / server scheduler
+- AI matching: OpenAI / Gemini / local embeddings
+- Notifications: Telegram Bot API first
+
+Required output:
+Create a complete product blueprint covering:
+
+1. Product concept
+2. MVP feature list
+3. User roles
+4. User journey
+5. Database schema
+6. Job matching logic
+7. Deduplication logic
+8. AI scoring logic
+9. Telegram notification flow
+10. Admin dashboard
+11. Safe job-source collection strategy
+12. System architecture
+13. API endpoints
+14. Cron job workflow
+15. Future expansion plan
+16. Step-by-step build plan
+17. Folder structure
+18. Sample code skeleton
+19. Risks and limitations
+20. Best monetization model
+
+Make the solution practical, clean, scalable, and beginner-friendly.
+
+Do not make this generic. Think like I want to actually build and launch this as a SaaS product for Indian QA professionals.

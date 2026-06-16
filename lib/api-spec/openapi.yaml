@@ -3,20 +3,29 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: QAHire – AI Job Curator API for Indian QA professionals
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: User job preference profile
+  - name: jobs
+    description: Job listings and management
+  - name: feedback
+    description: User feedback on job listings
+  - name: telegram
+    description: Telegram notification management
+  - name: stats
+    description: Dashboard stats and summaries
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +33,560 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Profile ────────────────────────────────────────────────────────────────
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get current user's job preference profile
+      responses:
+        "200":
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Profile not found
+    post:
+      operationId: createProfile
+      tags: [profile]
+      summary: Create job preference profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "201":
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update job preference profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  # ── Jobs ───────────────────────────────────────────────────────────────────
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List jobs for current user with optional filters
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, interested, applied, not_relevant, duplicate]
+        - name: minScore
+          in: query
+          schema:
+            type: integer
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Jobs list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListResponse"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a single job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Not found
+
+  /jobs/{id}/status:
+    patch:
+      operationId: updateJobStatus
+      tags: [jobs]
+      summary: Update user status for a job (interested, applied, not_relevant, duplicate)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobStatusUpdate"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  # ── Feedback ───────────────────────────────────────────────────────────────
+  /feedback:
+    post:
+      operationId: submitFeedback
+      tags: [feedback]
+      summary: Submit detailed feedback on a job listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInput"
+      responses:
+        "201":
+          description: Feedback recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  # ── Telegram ───────────────────────────────────────────────────────────────
+  /telegram/connect:
+    post:
+      operationId: connectTelegram
+      tags: [telegram]
+      summary: Connect user's Telegram account using chat ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelegramConnectInput"
+      responses:
+        "200":
+          description: Telegram connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelegramStatus"
+
+  /telegram/status:
+    get:
+      operationId: getTelegramStatus
+      tags: [telegram]
+      summary: Get Telegram connection status for current user
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelegramStatus"
+
+  /telegram/disconnect:
+    post:
+      operationId: disconnectTelegram
+      tags: [telegram]
+      summary: Disconnect Telegram from user account
+      responses:
+        "200":
+          description: Disconnected
+
+  /telegram/test:
+    post:
+      operationId: sendTelegramTest
+      tags: [telegram]
+      summary: Send a test Telegram message to the user
+      responses:
+        "200":
+          description: Test message sent
+
+  # ── Stats / Dashboard summary ─────────────────────────────────────────────
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Dashboard overview – counts, recent activity, top sources
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/recent-jobs:
+    get:
+      operationId: getRecentJobs
+      tags: [stats]
+      summary: Last 5 high-scoring job matches for quick preview
+      responses:
+        "200":
+          description: Recent top jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /stats/sources:
+    get:
+      operationId: getSourceBreakdown
+      tags: [stats]
+      summary: Job count grouped by source
+      responses:
+        "200":
+          description: Source breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SourceCount"
+
+  /stats/score-distribution:
+    get:
+      operationId: getScoreDistribution
+      tags: [stats]
+      summary: Distribution of AI match scores
+      responses:
+        "200":
+          description: Score distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreBucket"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ── Profile ──────────────────────────────────────────────────────────────
+    Profile:
+      type: object
+      required: [id, userId, skills, yearsOfExperience, preferredLocations, noticePeriod, jobTypes, includeKeywords, excludeKeywords, expectedSalaryMin, expectedSalaryMax, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        yearsOfExperience:
+          type: integer
+        preferredLocations:
+          type: array
+          items:
+            type: string
+        noticePeriod:
+          type: string
+        jobTypes:
+          type: array
+          items:
+            type: string
+            enum: [full-time, remote, hybrid, contract]
+        includeKeywords:
+          type: array
+          items:
+            type: string
+        excludeKeywords:
+          type: array
+          items:
+            type: string
+        expectedSalaryMin:
+          type: ["integer", "null"]
+        expectedSalaryMax:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ProfileInput:
+      type: object
+      required: [skills, yearsOfExperience, preferredLocations, noticePeriod, jobTypes, includeKeywords, excludeKeywords]
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        yearsOfExperience:
+          type: integer
+          minimum: 0
+        preferredLocations:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        noticePeriod:
+          type: string
+        jobTypes:
+          type: array
+          items:
+            type: string
+            enum: [full-time, remote, hybrid, contract]
+          minItems: 1
+        includeKeywords:
+          type: array
+          items:
+            type: string
+        excludeKeywords:
+          type: array
+          items:
+            type: string
+        expectedSalaryMin:
+          type: ["integer", "null"]
+        expectedSalaryMax:
+          type: ["integer", "null"]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+        yearsOfExperience:
+          type: integer
+          minimum: 0
+        preferredLocations:
+          type: array
+          items:
+            type: string
+        noticePeriod:
+          type: string
+        jobTypes:
+          type: array
+          items:
+            type: string
+        includeKeywords:
+          type: array
+          items:
+            type: string
+        excludeKeywords:
+          type: array
+          items:
+            type: string
+        expectedSalaryMin:
+          type: ["integer", "null"]
+        expectedSalaryMax:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+
+    # ── Job ──────────────────────────────────────────────────────────────────
+    Job:
+      type: object
+      required: [id, userId, title, company, location, source, applyUrl, postedAt, matchScore, matchReason, status, skills, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        source:
+          type: string
+        applyUrl:
+          type: string
+        postedAt:
+          type: ["string", "null"]
+        matchScore:
+          type: integer
+          description: AI match score 0-100
+        matchReason:
+          type: string
+          description: AI explanation of why this job matches the user profile
+        status:
+          type: string
+          enum: [new, interested, applied, not_relevant, duplicate]
+        skills:
+          type: array
+          items:
+            type: string
+        experienceRequired:
+          type: ["string", "null"]
+        salaryRange:
+          type: ["string", "null"]
+        jobType:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    JobListResponse:
+      type: object
+      required: [jobs, total, page, limit]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Job"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    JobStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [new, interested, applied, not_relevant, duplicate]
+
+    # ── Feedback ─────────────────────────────────────────────────────────────
+    Feedback:
+      type: object
+      required: [id, userId, jobId, rating, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        jobId:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    FeedbackInput:
+      type: object
+      required: [jobId, rating]
+      properties:
+        jobId:
+          type: integer
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+
+    # ── Telegram ─────────────────────────────────────────────────────────────
+    TelegramStatus:
+      type: object
+      required: [connected]
+      properties:
+        connected:
+          type: boolean
+        chatId:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+
+    TelegramConnectInput:
+      type: object
+      required: [chatId]
+      properties:
+        chatId:
+          type: string
+        username:
+          type: string
+
+    # ── Stats ─────────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalJobs, newJobs, interestedJobs, appliedJobs, avgMatchScore, lastSearchAt, profileComplete, telegramConnected]
+      properties:
+        totalJobs:
+          type: integer
+        newJobs:
+          type: integer
+        interestedJobs:
+          type: integer
+        appliedJobs:
+          type: integer
+        avgMatchScore:
+          type: number
+        lastSearchAt:
+          type: ["string", "null"]
+        profileComplete:
+          type: boolean
+        telegramConnected:
+          type: boolean
+
+    SourceCount:
+      type: object
+      required: [source, count]
+      properties:
+        source:
+          type: string
+        count:
+          type: integer
+
+    ScoreBucket:
+      type: object
+      required: [range, count]
+      properties:
+        range:
+          type: string
+        count:
+          type: integer

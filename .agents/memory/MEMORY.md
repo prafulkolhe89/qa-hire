@@ -1,0 +1,2 @@
+- [API client barrel import rule](api-client-barrel.md) — never import from @workspace/api-client-react/src/... deep paths; always use the barrel export only.
+- [JobStatus enum pattern](job-status-enum.md) — JobStatus is a TS union type, not a runtime enum; use string literals like "interested" not JobStatus.interested.
