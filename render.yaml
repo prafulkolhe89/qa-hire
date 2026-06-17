@@ -7,9 +7,8 @@ services:
 
     # Run from the workspace root so pnpm workspace links resolve correctly
     buildCommand: >
-      npm install -g pnpm@11 &&
-      pnpm install --frozen-lockfile=false &&
-      pnpm --filter @workspace/api-server run build
+      npx --yes pnpm@11 install --frozen-lockfile=false &&
+      npx pnpm@11 --filter @workspace/api-server run build
 
     startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
 
