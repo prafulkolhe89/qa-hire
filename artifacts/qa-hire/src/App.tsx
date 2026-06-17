@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk } from '@clerk/react';
+import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
@@ -140,6 +140,20 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   );
 }
 
+// When the frontend and backend are on different origins (GitHub Pages + Render)
+// cookies don't cross domains. This component registers a Bearer token getter
+// so every API call includes "Authorization: Bearer <clerk-jwt>".
+function ClerkAuthBridge() {
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setAuthTokenGetter(() => getToken());
+    return () => setAuthTokenGetter(null);
+  }, [getToken]);
+
+  return null;
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -176,6 +190,7 @@ function ClerkProviderWithRoutes() {
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
       <QueryClientProvider client={queryClient}>
+        <ClerkAuthBridge />
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={HomeRedirect} />
