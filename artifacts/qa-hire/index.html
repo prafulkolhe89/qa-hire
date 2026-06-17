@@ -19,6 +19,23 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Restore path saved by 404.html GitHub Pages redirect -->
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var redirect = params.get('redirect');
+        if (redirect) {
+          params.delete('redirect');
+          var rest = params.toString();
+          var newUrl =
+            window.location.pathname +
+            (rest ? '?' + rest : '') +
+            (redirect.indexOf('#') !== -1 ? '' : window.location.hash);
+          // Push the real path so the React router sees it
+          history.replaceState(null, '', newUrl);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

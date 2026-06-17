@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>QA Hire</title>
+    <script>
+      // GitHub Pages 404 → SPA redirect trick.
+      // Preserve the full path + query string (including __clerk_handshake)
+      // and redirect to the app root so the React router can handle it.
+      var base = '/qa-hire';
+      var search = location.search;
+      var hash = location.hash;
+      var path = location.pathname.replace(base, '') || '/';
+      var redirectTo = base + '/?redirect=' + encodeURIComponent(path + search + hash);
+      // If we already have a clerk handshake on the root, just go there directly
+      if (location.search.indexOf('__clerk_handshake') !== -1) {
+        window.location.replace(base + '/' + location.search + location.hash);
+      } else {
+        window.location.replace(redirectTo);
+      }
+    </script>
+  </head>
+  <body></body>
+</html>
