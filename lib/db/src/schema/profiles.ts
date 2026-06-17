@@ -1,6 +1,9 @@
-import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+export const subscriptionPlanEnum = ["free", "pro"] as const;
+export type SubscriptionPlan = typeof subscriptionPlanEnum[number];
 
 export const profilesTable = pgTable("profiles", {
   id: serial("id").primaryKey(),
@@ -15,6 +18,15 @@ export const profilesTable = pgTable("profiles", {
   expectedSalaryMin: integer("expected_salary_min"),
   expectedSalaryMax: integer("expected_salary_max"),
   isActive: boolean("is_active").notNull().default(true),
+  // Subscription & usage tracking
+  subscriptionPlan: text("subscription_plan").notNull().default("free"),
+  profileVersion: integer("profile_version").notNull().default(1),
+  monthlyProfileEditCount: integer("monthly_profile_edit_count").notNull().default(0),
+  dailyJobMatchCount: integer("daily_job_match_count").notNull().default(0),
+  dailyCoverLetterCount: integer("daily_cover_letter_count").notNull().default(0),
+  lastProfileChangedAt: timestamp("last_profile_changed_at"),
+  searchQuotaUsed: integer("search_quota_used").notNull().default(0),
+  quotaResetDate: date("quota_reset_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: qa-hire-api
+    runtime: node
+    plan: free
+    region: singapore
+
+    # Run from the workspace root so pnpm workspace links resolve correctly
+    buildCommand: >
+      npm install -g pnpm@11 &&
+      pnpm install --frozen-lockfile=false &&
+      pnpm --filter @workspace/api-server run build
+
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      # Set the values below in the Render dashboard (Environment → Secret Files / Env Vars)
+      - key: DATABASE_URL
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: UPLOAD_DIR
+        value: /tmp/uploads

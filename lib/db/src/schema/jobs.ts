@@ -23,6 +23,9 @@ export const jobsTable = pgTable("jobs", {
   jobType: text("job_type"),
   description: text("description"),
   externalId: text("external_id"),
+  matchedSkills: text("matched_skills").array().notNull().default([]),
+  missingSkills: text("missing_skills").array().notNull().default([]),
+  profileVersionId: integer("profile_version_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

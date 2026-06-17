@@ -298,3 +298,134 @@ export const GetScoreDistributionResponseItem = zod.object({
 export const GetScoreDistributionResponse = zod.array(GetScoreDistributionResponseItem)
 
 
+// ─── Resume ──────────────────────────────────────────────────────────────────
+
+export const GetResumeResponse = zod.object({
+  "id": zod.number(),
+  "fileName": zod.string(),
+  "fileType": zod.string(),
+  "status": zod.enum(["pending", "processing", "ready", "failed"]),
+  "hasText": zod.boolean(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const UploadResumeResponse = zod.object({
+  "id": zod.number(),
+  "fileName": zod.string(),
+  "status": zod.string(),
+  "message": zod.string()
+})
+
+export const ExtractKeywordsResponse = zod.object({
+  "keywords": zod.array(zod.object({
+    "id": zod.number(),
+    "userId": zod.string(),
+    "keyword": zod.string(),
+    "category": zod.string(),
+    "source": zod.string(),
+    "createdAt": zod.string(),
+    "updatedAt": zod.string()
+  })),
+  "yearsOfExperience": zod.number().nullable()
+})
+
+
+// ─── Keywords ────────────────────────────────────────────────────────────────
+
+export const KeywordItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "keyword": zod.string(),
+  "category": zod.string(),
+  "source": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const GetKeywordsResponse = zod.array(KeywordItem)
+
+export const AddKeywordBody = zod.object({
+  "keyword": zod.string().min(1).max(100),
+  "category": zod.string().optional(),
+  "source": zod.enum(["resume_generated", "user_added", "user_edited", "system_suggested"]).optional()
+})
+
+export const UpdateKeywordBody = zod.object({
+  "keyword": zod.string().min(1).max(100).optional(),
+  "category": zod.string().optional()
+})
+
+export const UpdateKeywordParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteKeywordParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+// ─── Cover Letter ─────────────────────────────────────────────────────────────
+
+export const CoverLetterItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "jobId": zod.number(),
+  "content": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const UpdateCoverLetterBody = zod.object({
+  "content": zod.string().min(1)
+})
+
+export const JobAiParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+// ─── Recruiter Message ────────────────────────────────────────────────────────
+
+export const RecruiterMessageItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "jobId": zod.number(),
+  "message": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+// ─── Apply Guidance ───────────────────────────────────────────────────────────
+
+export const ApplyGuidanceItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.string(),
+  "jobId": zod.number(),
+  "applyMethod": zod.string(),
+  "directApplyUrl": zod.string().nullable(),
+  "sourceApplyUrl": zod.string().nullable(),
+  "actionSteps": zod.string(),
+  "useResume": zod.boolean(),
+  "useCoverLetter": zod.boolean(),
+  "recruiterNote": zod.string().nullable(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+// ─── Subscription ─────────────────────────────────────────────────────────────
+
+export const GetSubscriptionResponse = zod.object({
+  "plan": zod.enum(["free", "pro"]),
+  "profileVersion": zod.number(),
+  "usage": zod.object({
+    "monthlyProfileEdits": zod.object({ "used": zod.number(), "limit": zod.number().nullable() }),
+    "dailyJobMatches": zod.object({ "used": zod.number(), "limit": zod.number().nullable() }),
+    "dailyCoverLetters": zod.object({ "used": zod.number(), "limit": zod.number().nullable() })
+  }),
+  "quotaResetDate": zod.string().nullable()
+})
+
+

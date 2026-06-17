@@ -210,6 +210,129 @@ page?: number;
 limit?: number;
 };
 
+// ─── Resume ──────────────────────────────────────────────────────────────────
+
+export type ResumeStatus = 'pending' | 'processing' | 'ready' | 'failed';
+
+export interface ResumeInfo {
+  id: number;
+  fileName: string;
+  fileType: string;
+  status: ResumeStatus;
+  hasText: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UploadResumeResponse {
+  id: number;
+  fileName: string;
+  status: string;
+  message: string;
+}
+
+// ─── Keywords ─────────────────────────────────────────────────────────────────
+
+export type KeywordSource = 'resume_generated' | 'user_added' | 'user_edited' | 'system_suggested';
+export type KeywordCategory =
+  | 'primary_role'
+  | 'qa_skill'
+  | 'automation_tool'
+  | 'programming_language'
+  | 'testing_type'
+  | 'framework'
+  | 'domain'
+  | 'certification'
+  | 'cloud_devops'
+  | 'other';
+
+export interface Keyword {
+  id: number;
+  userId: string;
+  keyword: string;
+  category: string;
+  source: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AddKeywordInput {
+  keyword: string;
+  category?: string;
+  source?: KeywordSource;
+}
+
+export interface UpdateKeywordInput {
+  keyword?: string;
+  category?: string;
+}
+
+export interface ExtractKeywordsResult {
+  keywords: Keyword[];
+  yearsOfExperience: number | null;
+}
+
+// ─── Cover Letter ─────────────────────────────────────────────────────────────
+
+export interface CoverLetter {
+  id: number;
+  userId: string;
+  jobId: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateCoverLetterInput {
+  content: string;
+}
+
+// ─── Recruiter Message ────────────────────────────────────────────────────────
+
+export interface RecruiterMessage {
+  id: number;
+  userId: string;
+  jobId: number;
+  message: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Apply Guidance ───────────────────────────────────────────────────────────
+
+export interface ApplyGuidance {
+  id: number;
+  userId: string;
+  jobId: number;
+  applyMethod: string;
+  directApplyUrl: string | null;
+  sourceApplyUrl: string | null;
+  actionSteps: string;
+  useResume: boolean;
+  useCoverLetter: boolean;
+  recruiterNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Subscription ─────────────────────────────────────────────────────────────
+
+export interface UsageCounter {
+  used: number;
+  limit: number | null;
+}
+
+export interface SubscriptionInfo {
+  plan: 'free' | 'pro';
+  profileVersion: number;
+  usage: {
+    monthlyProfileEdits: UsageCounter;
+    dailyJobMatches: UsageCounter;
+    dailyCoverLetters: UsageCounter;
+  };
+  quotaResetDate: string | null;
+}
+
 export type ListJobsStatus = typeof ListJobsStatus[keyof typeof ListJobsStatus];
 
 

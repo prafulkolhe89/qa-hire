@@ -6,10 +6,12 @@ import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wo
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { setBaseUrl } from "@workspace/api-client-react";
 
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Jobs from "@/pages/jobs";
+import JobDetail from "@/pages/job-detail";
 import Profile from "@/pages/profile";
 import TelegramSetup from "@/pages/telegram";
 import Settings from "@/pages/settings";
@@ -37,6 +39,14 @@ function stripBase(path: string): string {
 
 if (!clerkPubKey) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
+}
+
+// When VITE_API_URL is set (e.g. production Render URL), route all API
+// calls to that host. Without it the client uses relative paths (same origin),
+// which is the correct behaviour on Replit / local dev.
+const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+if (apiUrl) {
+  setBaseUrl(apiUrl);
 }
 
 const clerkAppearance = {
@@ -174,6 +184,7 @@ function ClerkProviderWithRoutes() {
           
           <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
           <Route path="/jobs"><ProtectedRoute component={Jobs} /></Route>
+          <Route path="/jobs/:id"><ProtectedRoute component={JobDetail} /></Route>
           <Route path="/profile"><ProtectedRoute component={Profile} /></Route>
           <Route path="/telegram"><ProtectedRoute component={TelegramSetup} /></Route>
           <Route path="/settings"><ProtectedRoute component={Settings} /></Route>

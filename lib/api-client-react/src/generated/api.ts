@@ -20,21 +20,32 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AddKeywordInput,
+  ApplyGuidance,
+  CoverLetter,
   DashboardStats,
+  ExtractKeywordsResult,
   Feedback,
   FeedbackInput,
   HealthStatus,
   Job,
   JobListResponse,
   JobStatusUpdate,
+  Keyword,
   ListJobsParams,
   Profile,
   ProfileInput,
   ProfileUpdate,
+  RecruiterMessage,
+  ResumeInfo,
   ScoreBucket,
   SourceCount,
+  SubscriptionInfo,
   TelegramConnectInput,
-  TelegramStatus
+  TelegramStatus,
+  UpdateCoverLetterInput,
+  UpdateKeywordInput,
+  UploadResumeResponse,
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1237,6 +1248,220 @@ export function useGetScoreDistribution<TData = Awaited<ReturnType<typeof getSco
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
   return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+// ─── Resume hooks ─────────────────────────────────────────────────────────────
+
+export const getGetResumeQueryKey = () => [`/api/resume`] as const;
+
+export const getResume = async (options?: RequestInit): Promise<ResumeInfo> =>
+  customFetch<ResumeInfo>(`/api/resume`, { ...options, method: 'GET' });
+
+export function useGetResume<TData = Awaited<ReturnType<typeof getResume>>, TError = ErrorType<unknown>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getResume>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetResumeQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getResume>>> = ({ signal }) => getResume({ signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const uploadResume = async (formData: FormData, options?: RequestInit): Promise<UploadResumeResponse> =>
+  customFetch<UploadResumeResponse>(`/api/resume/upload`, { ...options, method: 'POST', body: formData });
+
+export function useUploadResume<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof uploadResume>>, TError, FormData> }
+): UseMutationResult<Awaited<ReturnType<typeof uploadResume>>, TError, FormData> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({
+    mutationFn: (formData: FormData) => uploadResume(formData),
+    ...mutationOptions,
+  });
+}
+
+export const deleteResume = async (options?: RequestInit): Promise<void> =>
+  customFetch<void>(`/api/resume`, { ...options, method: 'DELETE' });
+
+export function useDeleteResume<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteResume>>, TError, void> }
+): UseMutationResult<Awaited<ReturnType<typeof deleteResume>>, TError, void> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: () => deleteResume(), ...mutationOptions });
+}
+
+export const extractResumeKeywords = async (options?: RequestInit): Promise<ExtractKeywordsResult> =>
+  customFetch<ExtractKeywordsResult>(`/api/resume/extract-keywords`, { ...options, method: 'POST' });
+
+export function useExtractResumeKeywords<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof extractResumeKeywords>>, TError, void> }
+): UseMutationResult<Awaited<ReturnType<typeof extractResumeKeywords>>, TError, void> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: () => extractResumeKeywords(), ...mutationOptions });
+}
+
+
+// ─── Keywords hooks ───────────────────────────────────────────────────────────
+
+export const getGetKeywordsQueryKey = () => [`/api/keywords`] as const;
+
+export const getKeywords = async (options?: RequestInit): Promise<Keyword[]> =>
+  customFetch<Keyword[]>(`/api/keywords`, { ...options, method: 'GET' });
+
+export function useGetKeywords<TData = Awaited<ReturnType<typeof getKeywords>>, TError = ErrorType<unknown>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getKeywords>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetKeywordsQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getKeywords>>> = ({ signal }) => getKeywords({ signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const addKeyword = async (data: AddKeywordInput, options?: RequestInit): Promise<Keyword> =>
+  customFetch<Keyword>(`/api/keywords`, { ...options, method: 'POST', body: JSON.stringify(data) });
+
+export function useAddKeyword<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof addKeyword>>, TError, AddKeywordInput> }
+): UseMutationResult<Awaited<ReturnType<typeof addKeyword>>, TError, AddKeywordInput> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: (data: AddKeywordInput) => addKeyword(data), ...mutationOptions });
+}
+
+export const updateKeyword = async (id: number, data: UpdateKeywordInput, options?: RequestInit): Promise<Keyword> =>
+  customFetch<Keyword>(`/api/keywords/${id}`, { ...options, method: 'PATCH', body: JSON.stringify(data) });
+
+export function useUpdateKeyword<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateKeyword>>, TError, { id: number; data: UpdateKeywordInput }> }
+): UseMutationResult<Awaited<ReturnType<typeof updateKeyword>>, TError, { id: number; data: UpdateKeywordInput }> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: ({ id, data }) => updateKeyword(id, data), ...mutationOptions });
+}
+
+export const deleteKeyword = async (id: number, options?: RequestInit): Promise<void> =>
+  customFetch<void>(`/api/keywords/${id}`, { ...options, method: 'DELETE' });
+
+export function useDeleteKeyword<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof deleteKeyword>>, TError, number> }
+): UseMutationResult<Awaited<ReturnType<typeof deleteKeyword>>, TError, number> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: (id: number) => deleteKeyword(id), ...mutationOptions });
+}
+
+
+// ─── Cover Letter hooks ───────────────────────────────────────────────────────
+
+export const getGetCoverLetterQueryKey = (jobId: number) => [`/api/jobs/${jobId}/cover-letter`] as const;
+
+export const getCoverLetter = async (jobId: number, options?: RequestInit): Promise<CoverLetter> =>
+  customFetch<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { ...options, method: 'GET' });
+
+export function useGetCoverLetter<TData = Awaited<ReturnType<typeof getCoverLetter>>, TError = ErrorType<unknown>>(
+  jobId: number,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCoverLetter>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetCoverLetterQueryKey(jobId);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoverLetter>>> = ({ signal }) => getCoverLetter(jobId, { signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, enabled: !!jobId, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const generateCoverLetter = async (jobId: number, options?: RequestInit): Promise<CoverLetter> =>
+  customFetch<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { ...options, method: 'POST' });
+
+export function useGenerateCoverLetter<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof generateCoverLetter>>, TError, number> }
+): UseMutationResult<Awaited<ReturnType<typeof generateCoverLetter>>, TError, number> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: (jobId: number) => generateCoverLetter(jobId), ...mutationOptions });
+}
+
+export const updateCoverLetter = async (jobId: number, data: UpdateCoverLetterInput, options?: RequestInit): Promise<CoverLetter> =>
+  customFetch<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { ...options, method: 'PATCH', body: JSON.stringify(data) });
+
+export function useUpdateCoverLetter<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof updateCoverLetter>>, TError, { jobId: number; data: UpdateCoverLetterInput }> }
+): UseMutationResult<Awaited<ReturnType<typeof updateCoverLetter>>, TError, { jobId: number; data: UpdateCoverLetterInput }> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: ({ jobId, data }) => updateCoverLetter(jobId, data), ...mutationOptions });
+}
+
+
+// ─── Recruiter Message hooks ──────────────────────────────────────────────────
+
+export const getGetRecruiterMessageQueryKey = (jobId: number) => [`/api/jobs/${jobId}/recruiter-message`] as const;
+
+export const getRecruiterMessage = async (jobId: number, options?: RequestInit): Promise<RecruiterMessage> =>
+  customFetch<RecruiterMessage>(`/api/jobs/${jobId}/recruiter-message`, { ...options, method: 'GET' });
+
+export function useGetRecruiterMessage<TData = Awaited<ReturnType<typeof getRecruiterMessage>>, TError = ErrorType<unknown>>(
+  jobId: number,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getRecruiterMessage>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetRecruiterMessageQueryKey(jobId);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecruiterMessage>>> = ({ signal }) => getRecruiterMessage(jobId, { signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, enabled: !!jobId, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const generateRecruiterMessage = async (jobId: number, options?: RequestInit): Promise<RecruiterMessage> =>
+  customFetch<RecruiterMessage>(`/api/jobs/${jobId}/recruiter-message`, { ...options, method: 'POST' });
+
+export function useGenerateRecruiterMessage<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof generateRecruiterMessage>>, TError, number> }
+): UseMutationResult<Awaited<ReturnType<typeof generateRecruiterMessage>>, TError, number> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: (jobId: number) => generateRecruiterMessage(jobId), ...mutationOptions });
+}
+
+
+// ─── Apply Guidance hooks ─────────────────────────────────────────────────────
+
+export const getGetApplyGuidanceQueryKey = (jobId: number) => [`/api/jobs/${jobId}/apply-guidance`] as const;
+
+export const getApplyGuidance = async (jobId: number, options?: RequestInit): Promise<ApplyGuidance> =>
+  customFetch<ApplyGuidance>(`/api/jobs/${jobId}/apply-guidance`, { ...options, method: 'GET' });
+
+export function useGetApplyGuidance<TData = Awaited<ReturnType<typeof getApplyGuidance>>, TError = ErrorType<unknown>>(
+  jobId: number,
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getApplyGuidance>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetApplyGuidanceQueryKey(jobId);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getApplyGuidance>>> = ({ signal }) => getApplyGuidance(jobId, { signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, enabled: !!jobId, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
+}
+
+export const generateApplyGuidance = async (jobId: number, options?: RequestInit): Promise<ApplyGuidance> =>
+  customFetch<ApplyGuidance>(`/api/jobs/${jobId}/apply-guidance`, { ...options, method: 'POST' });
+
+export function useGenerateApplyGuidance<TError = ErrorType<unknown>>(
+  options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof generateApplyGuidance>>, TError, number> }
+): UseMutationResult<Awaited<ReturnType<typeof generateApplyGuidance>>, TError, number> {
+  const { mutation: mutationOptions } = options ?? {};
+  return useMutation({ mutationFn: (jobId: number) => generateApplyGuidance(jobId), ...mutationOptions });
+}
+
+
+// ─── Subscription hooks ───────────────────────────────────────────────────────
+
+export const getGetSubscriptionQueryKey = () => [`/api/subscription`] as const;
+
+export const getSubscription = async (options?: RequestInit): Promise<SubscriptionInfo> =>
+  customFetch<SubscriptionInfo>(`/api/subscription`, { ...options, method: 'GET' });
+
+export function useGetSubscription<TData = Awaited<ReturnType<typeof getSubscription>>, TError = ErrorType<unknown>>(
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getSubscription>>, TError, TData>; request?: SecondParameter<typeof customFetch> }
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getGetSubscriptionQueryKey();
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSubscription>>> = ({ signal }) => getSubscription({ signal, ...requestOptions });
+  const query = useQuery({ queryKey, queryFn, ...queryOptions }) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  return { ...query, queryKey };
 }
 
 
